@@ -6,5 +6,6 @@ const router = Router();
 
 router.use("/auth", authRouter);
 router.use("/users", usersRouter);
+router.use("/sounds");
 
 export default router;
