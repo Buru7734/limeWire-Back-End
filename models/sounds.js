@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 
 const soundSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  title: { Type: String, Required: true },
-  description: { Type: String, Required: true },
+  title: { type: String, Required: true },
+  description: { type: String, Required: true },
   tags: {
-    Type: String,
+    type: String,
     enum: ["SoundBite", "Music", "Foley", "SoundEffect", "Ambient"],
   },
 });

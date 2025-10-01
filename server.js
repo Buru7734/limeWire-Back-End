@@ -5,6 +5,9 @@ import logger from "morgan";
 import dotenv from "dotenv";
 dotenv.config();
 
+console.log("MONGODB_URI:", process.env.MONGODB_URI ? "loaded" : "missing");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "loaded" : "missing");
+
 const app = express();
 
 // Import routers

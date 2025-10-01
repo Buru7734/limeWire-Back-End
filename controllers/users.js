@@ -1,5 +1,3 @@
-// import express from "express";
-import router from "../routes/users.js";
 import User from "../models/user.js";
 
 export const getUsers = async (req, res) => {
@@ -29,5 +27,3 @@ export const getUser = async (req, res) => {
     res.status(500).json({ err: err.message });
   }
 };
-
-export default router;
