@@ -8,4 +8,6 @@ router.get("/", verifyToken, usersController.getUsers);
 
 router.get("/:userId", verifyToken, usersController.getUser);
 
+router.delete("/:userId", verifyToken, usersController.deleteUser);
+
 export default router;
