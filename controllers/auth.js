@@ -2,19 +2,34 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
-const saltRounds = 12;
+// Constants
+const SALT_ROUNDS = 12;
+
+const JWT_EXPIRES_IN = "7d"; // Token expires in 7 days
+
+// JWT signing options
+const JWT_OPTIONS = {
+  expiresIn: JWT_EXPIRES_IN,
+};
 
 export const signUp = async (req, res) => {
   try {
-    const userInDatabase = await User.findOne({ username: req.body.username });
+    // Input validation
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ err: "Username and password are required." });
+    }
+    
+    const userInDatabase = await User.findOne({ username: username.trim() });
 
     if (userInDatabase) {
       return res.status(409).json({ err: "Username already taken." });
     }
 
     const user = await User.create({
-      username: req.body.username,
-      hashedPassword: bcrypt.hashSync(req.body.password, saltRounds),
+      username: username.trim(),
+      hashedPassword: bcrypt.hashSync(password, SALT_ROUNDS),
     });
 
     const payload = { username: user.username, _id: user._id };
@@ -29,13 +44,20 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.body.username });
+    // Input validation
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ err: "Username and password are required." });
+    }
+    
+    const user = await User.findOne({ username: username.trim() });
     if (!user) {
       return res.status(401).json({ err: "Invalid credentials." });
     }
 
     const isPasswordCorrect = bcrypt.compareSync(
-      req.body.password,
+      password,
       user.hashedPassword
     );
     if (!isPasswordCorrect) {

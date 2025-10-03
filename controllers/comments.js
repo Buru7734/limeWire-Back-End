@@ -3,17 +3,36 @@ import Comment from "../models/comments.js";
 //Create
 export const createComment = async (req, res) => {
   try {
-    const data = await Comment.create(req.body);
-    res.status(201).json(data);
+    // Add the user from the verified token
+    const commentData = {
+      ...req.body,
+      user: req.user._id // This comes from your verifyToken middleware
+    };
+    const data = await Comment.create(commentData);
+    
+    // Populate the user before returning
+    const populatedComment = await Comment.findById(data._id).populate('user', 'username');
+    res.status(201).json(populatedComment);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
 };
 
+export const getSoundComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({ sound: req.query.sound })
+      .populate('user', 'username') 
+      .sort({ createdAt: -1 }); 
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 //Get
 export const getComment = async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.commentId);
+    const comment = await Comment.findById(req.params.commentId)
+      .populate('user', 'username'); // Add population here too
 
     if (!comment) return res.status(404).json({ err: "Comment not found" });
     res.json(comment);
