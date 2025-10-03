@@ -10,6 +10,19 @@ export const createComment = async (req, res) => {
   }
 };
 
+export const getSoundComments = async (req, res) => {
+  // We will receive sound id via req.query (key=sound)
+  // From the Comment model, find all comments with sound=req.body.sound
+  try {
+    const comments = await Comment.find({ sound: req.query.sound });
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+  // We may need to populate the user
+  // return the data
+};
+
 //Get
 export const getComment = async (req, res) => {
   try {
