@@ -5,6 +5,9 @@ import logger from "morgan";
 import dotenv from "dotenv";
 dotenv.config();
 
+console.log("MONGODB_URI:", process.env.MONGODB_URI ? "loaded" : "missing");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "loaded" : "missing");
+
 const app = express();
 
 // Import routers
@@ -24,6 +27,7 @@ app.use("/", routes);
 
 // Start the server and listen on port 3000
 db.on("connected", () => {
+  // console.clear();
   console.log("Connected to MongoDB");
   app.listen(3000, () => {
     console.log("The express app is ready!");
