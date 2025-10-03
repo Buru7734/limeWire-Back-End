@@ -6,8 +6,8 @@ const soundSchema = new mongoose.Schema(
     title: { type: String, Required: true },
     description: { type: String, Required: true },
     tags: {
-      type: String,
-      enum: ["SoundBite", "Music", "Foley", "SoundEffect", "Ambient"],
+      type: [String],
+      enum: ["soundBite", "music", "foley", "soundEffect", "ambient"],
     },
     // ---- GridFS linkage fields ----
     fileId: {
