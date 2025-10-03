@@ -4,9 +4,15 @@ import * as soundController from "../controllers/sounds.js";
 
 const router = Router();
 
-router.post("/", verifyToken, soundController.createSound);
+router.post(
+  "/",
+  verifyToken,
+  soundController.uploadMiddleware,
+  soundController.createSound
+);
 router.get("/", verifyToken, soundController.getSounds);
 router.get("/:soundId", verifyToken, soundController.getSound);
+router.get("/:soundId/stream", soundController.streamSound);
 router.put("/:soundId", verifyToken, soundController.updateSound);
 router.delete("/:soundId", verifyToken, soundController.deleteSound);
 

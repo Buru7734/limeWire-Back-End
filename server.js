@@ -27,6 +27,7 @@ app.use("/", routes);
 
 // Start the server and listen on port 3000
 db.on("connected", () => {
+  // console.clear();
   console.log("Connected to MongoDB");
   app.listen(3000, () => {
     console.log("The express app is ready!");
