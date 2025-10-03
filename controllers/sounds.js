@@ -1,28 +1,25 @@
 import db from "../db/connection.js";
 import multer from "multer";
-import { GridFsStorage } from "multer-gridfs-storage";
 import { GridFSBucket } from "mongodb";
 import Sound from "../models/sounds.js";
+import mongoose from "mongoose";
+import { Readable } from "stream";
 
-const dbPromise = db.asPromise().then((conn) => conn.getClient().db());
+// Get the native MongoDB database instance
+let bucket;
 
-// Bucket depends on the same native Db. Build it lazily when needed.
-async function getBucket() {
-  const db = await dbPromise;
-  return new GridFSBucket(db, { bucketName: "audio" });
-}
-
-// Configure storage with a Promise<Db>. This prevents the f === undefined issue.
-const storage = new GridFsStorage({
-  db: dbPromise, // ✅ the library will await this
-  file: (req, file) => ({
-    bucketName: "audio",
-    filename: `${Date.now()}-${file.originalname}`,
-    metadata: { uploadedBy: req.user?._id || "unknown" },
-  }),
+// Initialize bucket when connection is ready
+db.once("open", () => {
+  bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "audio" });
+  console.log("GridFS bucket initialized");
 });
 
-export const uploadMiddleware = multer({ storage }).single("audio");
+// Use memory storage for multer (we'll handle GridFS manually)
+const storage = multer.memoryStorage();
+export const uploadMiddleware = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+}).single("audio");
 
 //get all sounds
 export const getSounds = async (req, res) => {
@@ -59,29 +56,76 @@ export const getSound = async (req, res) => {
 // POST /sounds
 export async function createSound(req, res) {
   try {
+    console.log("req.user:", req.user);
+    console.log("req.file:", req.file);
+    console.log("req.body:", req.body);
+
     if (!req.file)
       return res.status(400).json({ error: "Missing 'audio' file" });
 
+    if (!bucket) {
+      return res.status(500).json({
+        error: "GridFS bucket not initialized yet. Please try again.",
+      });
+    }
+
     const { title, description, tags } = req.body;
 
+    // Create a readable stream from the buffer
+    const readableStream = Readable.from(req.file.buffer);
+
+    // Generate filename
+    const filename = `${Date.now()}-${req.file.originalname}`;
+
+    // Upload to GridFS
+    const uploadStream = bucket.openUploadStream(filename, {
+      contentType: req.file.mimetype || "audio/mpeg",
+      metadata: {
+        uploadedBy: req.user?._id || "unknown",
+        originalName: req.file.originalname,
+      },
+    });
+
+    // Pipe the file to GridFS
+    readableStream.pipe(uploadStream);
+
+    // Wait for upload to complete
+    await new Promise((resolve, reject) => {
+      uploadStream.on("finish", resolve);
+      uploadStream.on("error", reject);
+    });
+
+    console.log("File uploaded to GridFS with ID:", uploadStream.id);
+
+    // Parse tags if they exist
+    let parsedTags = [];
+    if (tags) {
+      try {
+        parsedTags = JSON.parse(tags);
+      } catch (err) {
+        console.warn("Invalid tags JSON, defaulting to empty array");
+      }
+    }
+    console.log("Parsed tags array:", parsedTags);
+
+    // Create Sound document with GridFS file info
     const sound = await Sound.create({
-      user: req.user?._id, // verifyToken should set req.user
+      user: req.user?._id,
       title,
       description,
-      tags,
-
-      fileId: req.file.id, // GridFS _id
-      filename: req.file.filename,
-      contentType: req.file.contentType || req.file.mimetype || "audio/mpeg",
+      tags: parsedTags,
+      fileId: uploadStream.id,
+      filename: filename,
+      contentType: req.file.mimetype || "audio/mpeg",
       length: req.file.size,
-      uploadDate: req.file.uploadDate,
-      bucketName: req.file.bucketName || "audio",
+      uploadDate: new Date(),
+      bucketName: "audio",
     });
 
     res.status(201).json(sound);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upload failed" });
+    console.error("Error creating sound:", err);
+    res.status(500).json({ error: "Upload failed", details: err.message });
   }
 }
 
@@ -90,6 +134,10 @@ export async function streamSound(req, res) {
   try {
     const sound = await Sound.findById(req.params.soundId);
     if (!sound) return res.status(404).json({ error: "Not found" });
+
+    if (!bucket) {
+      return res.status(500).json({ error: "GridFS bucket not initialized" });
+    }
 
     res.set("Content-Type", sound.contentType || "audio/mpeg");
     bucket
@@ -106,7 +154,10 @@ export async function streamSound(req, res) {
 export const updateSound = async (req, res) => {
   try {
     const sound = await Sound.findById(req.params.soundId);
-    if (sound.user.equals(req.body._id)) {
+    if (!sound) {
+      return res.status(404).json({ error: "Sound not found" });
+    }
+    if (!sound.user.equals(req.user._id)) {
       return res.status(403).send("You're not allowed to do that!");
     }
     const updatedSound = await Sound.findByIdAndUpdate(
@@ -125,8 +176,10 @@ export const updateSound = async (req, res) => {
 export const deleteSound = async (req, res) => {
   try {
     const sound = await Sound.findById(req.params.soundId);
-
-    if (sound.user.equals(req.body._id)) {
+    if (!sound) {
+      return res.status(404).json({ error: "Sound not found" });
+    }
+    if (!sound.user.equals(req.user._id)) {
       return res.status(403).send("You're not allowed to do that!");
     }
     const deletedSound = await Sound.findByIdAndDelete(req.params.soundId);
