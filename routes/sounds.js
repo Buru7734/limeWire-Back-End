@@ -11,9 +11,6 @@ router.post(
   soundController.createSound
 );
 
-console.log("verifyToken:", verifyToken);
-console.log("uploadMiddleware:", soundController.uploadMiddleware);
-console.log("createSound:", soundController.createSound);
 
 router.get("/stream/:fileId", soundController.streamSoundFile);
 router.get("/", soundController.getSounds);

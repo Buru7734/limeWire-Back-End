@@ -4,7 +4,7 @@ import User from "../models/user.js";
 
 // Constants
 const SALT_ROUNDS = 12;
-const MIN_PASSWORD_LENGTH = 6;
+
 const JWT_EXPIRES_IN = "7d"; // Token expires in 7 days
 
 // JWT signing options
@@ -19,10 +19,6 @@ export const signUp = async (req, res) => {
     
     if (!username || !password) {
       return res.status(400).json({ err: "Username and password are required." });
-    }
-    
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      return res.status(400).json({ err: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.` });
     }
     
     const userInDatabase = await User.findOne({ username: username.trim() });
