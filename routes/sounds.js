@@ -1,5 +1,5 @@
 import { Router } from "express";
-import verifyToken from "../middleware/verify-token.js ";
+import verifyToken from "../middleware/verify-token.js";
 import * as soundController from "../controllers/sounds.js";
 
 const router = Router();
@@ -10,8 +10,14 @@ router.post(
   soundController.uploadMiddleware,
   soundController.createSound
 );
-router.get("/", verifyToken, soundController.getSounds);
-router.get("/:soundId", verifyToken, soundController.getSound);
+
+console.log("verifyToken:", verifyToken);
+console.log("uploadMiddleware:", soundController.uploadMiddleware);
+console.log("createSound:", soundController.createSound);
+
+router.get("/stream/:fileId", soundController.streamSoundFile);
+router.get("/", soundController.getSounds);
+router.get("/:soundId", soundController.getSound);
 router.get("/:soundId/stream", soundController.streamSound);
 router.put("/:soundId", verifyToken, soundController.updateSound);
 router.delete("/:soundId", verifyToken, soundController.deleteSound);

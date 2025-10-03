@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import Sound from "../models/sounds.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -21,8 +22,9 @@ export const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ err: "User not found." });
     }
+    const sounds = await Sound.find({ user: req.params.userId });
 
-    res.json(user);
+   res.json({ ...user.toObject(), sounds });
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
