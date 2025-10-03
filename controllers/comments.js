@@ -14,7 +14,9 @@ export const getSoundComments = async (req, res) => {
   // We will receive sound id via req.query (key=sound)
   // From the Comment model, find all comments with sound=req.body.sound
   try {
-    const comments = await Comment.find({ sound: req.query.sound });
+    const comments = await Comment.find({ sound: req.query.sound }).populate(
+      "user"
+    );
     res.json(comments);
   } catch (error) {
     res.status(500).json({ error: error.message });
