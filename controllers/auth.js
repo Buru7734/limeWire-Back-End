@@ -35,12 +35,6 @@ export const signUp = async (req, res) => {
         .json({ err: "Username and password are required." });
     }
 
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      return res.status(400).json({
-        err: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
-      });
-    }
-
     const userInDatabase = await User.findOne({ username: username.trim() });
 
     if (userInDatabase) {
