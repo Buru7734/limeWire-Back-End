@@ -14,17 +14,33 @@ const JWT_OPTIONS = {
 
 export const signUp = async (req, res) => {
   try {
-    // Input validation
-    const { username, password } = req.body;
-    
+    console.log("Received body:", req.body);
+
+    //Input validation
+    const { username, password, passwordConf } = req.body;
+
+    //Basic validation
+    if (!username || !password || !passwordConf) {
+      return res.status(400).json({ err: "All fields are required." });
+    }
+
+    //Password confirmation check
+    if (password !== passwordConf) {
+      return res.status(400).json({ err: "Passwords do not match." });
+    }
+
     if (!username || !password) {
-      return res.status(400).json({ err: "Username and password are required." });
+      return res
+        .status(400)
+        .json({ err: "Username and password are required." });
     }
-    
+
     if (password.length < MIN_PASSWORD_LENGTH) {
-      return res.status(400).json({ err: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.` });
+      return res.status(400).json({
+        err: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
+      });
     }
-    
+
     const userInDatabase = await User.findOne({ username: username.trim() });
 
     if (userInDatabase) {
@@ -50,22 +66,31 @@ export const signIn = async (req, res) => {
   try {
     // Input validation
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
-      return res.status(400).json({ err: "Username and password are required." });
-    }
-    
-    const user = await User.findOne({ username: username.trim() });
-    if (!user) {
-      return res.status(401).json({ err: "Invalid credentials." });
+      return res
+        .status(400)
+        .json({ err: "Username and password are required." });
     }
 
-    const isPasswordCorrect = bcrypt.compareSync(
-      password,
-      user.hashedPassword
-    );
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ err: "Username and password are required." });
+    }
+
+    const user = await User.findOne({ username: username.trim() });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ err: "Username or password is incorrect." });
+    }
+
+    const isPasswordCorrect = bcrypt.compareSync(password, user.hashedPassword);
     if (!isPasswordCorrect) {
-      return res.status(401).json({ err: "Invalid credentials." });
+      return res
+        .status(401)
+        .json({ err: "Username or password is incorrect." });
     }
 
     const payload = { username: user.username, _id: user._id };
