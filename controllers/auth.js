@@ -4,7 +4,7 @@ import User from "../models/user.js";
 
 // Constants
 const SALT_ROUNDS = 12;
-const MIN_PASSWORD_LENGTH = 6;
+
 const JWT_EXPIRES_IN = "7d"; // Token expires in 7 days
 
 // JWT signing options
