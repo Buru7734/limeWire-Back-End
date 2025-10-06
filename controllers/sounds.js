@@ -1,24 +1,24 @@
-import { Readable } from 'stream';
-import Sound from '../models/sounds.js'; // Adjust path as needed
-import { bucket } from '../config/gridfs.js';
-import multer from 'multer';
-import { ObjectId } from 'mongodb';
+import { Readable } from "stream";
+import Sound from "../models/sounds.js"; // Adjust path as needed
+import { bucket } from "../config/gridfs.js";
+import multer from "multer";
+import { ObjectId } from "mongodb";
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
-export const uploadMiddleware = multer({ 
+export const uploadMiddleware = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('audio/')) {
+    if (file.mimetype.startsWith("audio/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only audio files are allowed!'), false);
+      cb(new Error("Only audio files are allowed!"), false);
     }
-  }
-}).single('audio');
+  },
+}).single("audio");
 
 export async function createSound(req, res) {
   try {
@@ -94,7 +94,7 @@ export async function createSound(req, res) {
     });
 
     // ✅ Populate the user field before returning
-    await sound.populate('user');
+    await sound.populate("user");
 
     res.status(201).json(sound);
   } catch (err) {
@@ -106,98 +106,99 @@ export async function createSound(req, res) {
 export async function streamSoundFile(req, res) {
   try {
     const { fileId } = req.params;
-    
+
     if (!ObjectId.isValid(fileId)) {
-      return res.status(400).json({ error: 'Invalid file ID' });
+      return res.status(400).json({ error: "Invalid file ID" });
     }
 
     const objectId = new ObjectId(fileId);
-    
+
     // Create download stream from GridFS
     const downloadStream = bucket.openDownloadStream(objectId);
-    
+
     // Handle stream errors
-    downloadStream.on('error', (error) => {
-      console.error('GridFS download error:', error);
+    downloadStream.on("error", (error) => {
+      console.error("GridFS download error:", error);
       if (!res.headersSent) {
-        res.status(404).json({ error: 'File not found' });
+        res.status(404).json({ error: "File not found" });
       }
     });
 
     // Set appropriate headers for audio streaming
     res.set({
-      'Content-Type': 'audio/mpeg',
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'no-cache'
+      "Content-Type": "audio/mpeg",
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "no-cache",
     });
 
     // Pipe the file to the response
     downloadStream.pipe(res);
-    
   } catch (error) {
-    console.error('Error streaming sound file:', error);
+    console.error("Error streaming sound file:", error);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to stream file' });
+      res.status(500).json({ error: "Failed to stream file" });
     }
   }
 }
 
 export async function getAllSounds(req, res) {
   try {
-    const sounds = await Sound.find().populate('user', 'username');
+    const sounds = await Sound.find().populate("user", "username");
     res.json(sounds);
   } catch (error) {
-    console.error('Error fetching sounds:', error);
-    res.status(500).json({ error: 'Failed to fetch sounds' });
+    console.error("Error fetching sounds:", error);
+    res.status(500).json({ error: "Failed to fetch sounds" });
   }
 }
 
 export async function getSoundById(req, res) {
   try {
-    const { id } = req.params;
-    const sound = await Sound.findById(id).populate('user', 'username');
-    
+    const { soundId } = req.params;
+    const sound = await Sound.findById(soundId).populate("user", "username");
+
     if (!sound) {
-      return res.status(404).json({ error: 'Sound not found' });
+      return res.status(404).json({ error: "Sound not found" });
     }
-    
+
     res.json(sound);
   } catch (error) {
-    console.error('Error fetching sound:', error);
-    res.status(500).json({ error: 'Failed to fetch sound' });
+    console.error("Error fetching sound:", error);
+    res.status(500).json({ error: "Failed to fetch sound" });
   }
 }
 
 export async function deleteSound(req, res) {
   try {
-    const { id } = req.params;
-    const sound = await Sound.findById(id);
-    
+    const { soundId } = req.params;
+    const sound = await Sound.findById(soundId);
+
     if (!sound) {
-      return res.status(404).json({ error: 'Sound not found' });
+      return res.status(404).json({ error: "Sound not found" });
     }
-    
+
     // Check if user owns the sound
     if (sound.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Not authorized to delete this sound' });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this sound" });
     }
-    
+
     // Delete from GridFS
     if (sound.fileId) {
       try {
         await bucket.delete(new ObjectId(sound.fileId));
       } catch (gridfsError) {
-        console.error('Error deleting from GridFS:', gridfsError);
+        console.error("Error deleting from GridFS:", gridfsError);
       }
     }
-    
+
     // Delete sound document
-    await Sound.findByIdAndDelete(id);
-    
-    res.json({ message: 'Sound deleted successfully' });
+    await Sound.findByIdAndDelete(soundId);
+
+    res.json({ message: "Sound deleted successfully" });
   } catch (error) {
-    console.error('Error deleting sound:', error);
-    res.status(500).json({ error: 'Failed to delete sound' });
+    console.error("Error deleting sound:", error);
+    res.status(500).json({ error: "Failed to delete sound" });
   }
 }
 
@@ -209,16 +210,16 @@ export async function streamSound(req, res) {
   try {
     const { soundId } = req.params;
     const sound = await Sound.findById(soundId);
-    
+
     if (!sound) {
-      return res.status(404).json({ error: 'Sound not found' });
+      return res.status(404).json({ error: "Sound not found" });
     }
-    
+
     // Redirect to the file streaming endpoint
     return streamSoundFile({ params: { fileId: sound.fileId } }, res);
   } catch (error) {
-    console.error('Error streaming sound:', error);
-    res.status(500).json({ error: 'Failed to stream sound' });
+    console.error("Error streaming sound:", error);
+    res.status(500).json({ error: "Failed to stream sound" });
   }
 }
 
@@ -226,18 +227,20 @@ export async function updateSound(req, res) {
   try {
     const { soundId } = req.params;
     const { title, description, tags } = req.body;
-    
+
     const sound = await Sound.findById(soundId);
-    
+
     if (!sound) {
-      return res.status(404).json({ error: 'Sound not found' });
+      return res.status(404).json({ error: "Sound not found" });
     }
-    
+
     // Check if user owns the sound
     if (sound.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Not authorized to update this sound' });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to update this sound" });
     }
-    
+
     // Parse tags if they exist
     let parsedTags = sound.tags;
     if (tags) {
@@ -247,20 +250,20 @@ export async function updateSound(req, res) {
         console.warn("Invalid tags JSON, keeping existing tags");
       }
     }
-    
+
     const updatedSound = await Sound.findByIdAndUpdate(
       soundId,
       {
         title: title || sound.title,
         description: description || sound.description,
-        tags: parsedTags
+        tags: parsedTags,
       },
       { new: true }
-    ).populate('user', 'username');
-    
+    ).populate("user", "username");
+
     res.json(updatedSound);
   } catch (error) {
-    console.error('Error updating sound:', error);
-    res.status(500).json({ error: 'Failed to update sound' });
+    console.error("Error updating sound:", error);
+    res.status(500).json({ error: "Failed to update sound" });
   }
 }
