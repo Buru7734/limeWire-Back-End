@@ -11,7 +11,6 @@ router.post(
   soundController.createSound
 );
 
-
 router.get("/stream/:fileId", soundController.streamSoundFile);
 router.get("/", soundController.getSounds);
 router.get("/:soundId", soundController.getSound);
