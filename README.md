@@ -10,25 +10,33 @@ A prototype backend server built for an audio-library web app, designed to suppo
 - Modular code structure: controllers, routes, models, middleware  
 - [Optional: if you used any ORM (Sequelize, TypeORM)—mention here]
 
-## 🎧 Key Features
 
-User Authentication
-Register & login with JWT auth
-Audio Uploading
-Upload audio files with metadata (title, artist, tags, category)
-Library Browsing
-Search, filter, and list audio assets
-Secure Streaming / Downloading
-Stream or download audio files via protected endpoints
-Admin / Management Tools (optional)
-Delete or manage uploaded assets
-Example API Endpoints:
-POST /api/users/register
-POST /api/users/login
-GET /api/audio
-POST /api/audio/upload
-GET /api/audio/:id
-DELETE /api/audio/:id
+## 🎧 Key Features  
+
+### **User Authentication**  
+- Register & login with JWT auth  
+
+### **Audio Uploading**  
+- Upload audio files with metadata (title, artist, tags, category)
+
+### **Library Browsing**  
+- Search, filter, and list audio assets  
+
+### **Secure Streaming / Downloading**  
+- Stream or download audio files via protected endpoints  
+
+### **Admin / Management Tools (optional)**  
+- Delete or manage uploaded assets  
+
+---
+  
+  ## Example API Endpoints:
+- POST /api/users/register
+- POST /api/users/login
+- GET /api/audio
+- POST /api/audio/upload
+- GET /api/audio/:id
+- DELETE /api/audio/:id
 
   ## 📁 Project Structure
   /src
