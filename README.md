@@ -32,12 +32,12 @@ A prototype backend server built for an audio-library web app, designed to suppo
   
   ## Example API Endpoints:
   ```
-- POST /api/users/register
-- POST /api/users/login
-- GET /api/audio
-- POST /api/audio/upload
-- GET /api/audio/:id
-- DELETE /api/audio/:id
+POST /api/users/register
+POST /api/users/login
+GET /api/audio
+POST /api/audio/upload
+GET /api/audio/:id
+DELETE /api/audio/:id
 ```
 
   ## 📁 Project Structure
