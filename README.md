@@ -10,20 +10,25 @@ A prototype backend server built for an audio-library web app, designed to suppo
 - Modular code structure: controllers, routes, models, middleware  
 - [Optional: if you used any ORM (Sequelize, TypeORM)—mention here]
 
-## 🎧 Key Features  
-- User registration & login (authentication + authorization)  
-- Upload and manage audio files (metadata: title, artist, tags, category)  
-- Browse, search, filter audio assets (by tags, category, keyword)  
-- Stream or download audio files (via secure endpoints)  
-- Admin endpoints for managing assets / users (if applicable)  
-- Example endpoints:  
-  - `POST /api/users/register`  
-  - `POST /api/users/login`  
-  - `GET /api/audio`  
-  - `POST /api/audio/upload`  
-  - `GET /api/audio/:id`  
-  - `DELETE /api/audio/:id`  
-- Designed with scalability and modularity in mind (ready to be extended into full audio-tech product)
+##🎧 Key Features
+
+User Authentication
+Register & login with JWT auth
+Audio Uploading
+Upload audio files with metadata (title, artist, tags, category)
+Library Browsing
+Search, filter, and list audio assets
+Secure Streaming / Downloading
+Stream or download audio files via protected endpoints
+Admin / Management Tools (optional)
+Delete or manage uploaded assets
+Example API Endpoints:
+POST /api/users/register
+POST /api/users/login
+GET /api/audio
+POST /api/audio/upload
+GET /api/audio/:id
+DELETE /api/audio/:id
 
   ## 📁 Project Structure
   /src
@@ -34,7 +39,7 @@ A prototype backend server built for an audio-library web app, designed to suppo
   /uploads        ← stored audio files (local or cloud)
   server.js
 
-⚙️ Installation & Setup
+##⚙️ Installation & Setup
 1. Clone the repo
 git clone https://github.com/yourusername/LimeWire-Back-End.git
 cd LimeWire-Back-End
@@ -51,12 +56,12 @@ UPLOAD_DIR=uploads
 4. Start the server
 npm run dev   # nodemon
 
-🔐 Authentication
+##🔐 Authentication
 
  All protected routes require:
  Authorization: Bearer <token>
 
-📦 Upload Handling
+##📦 Upload Handling
 
  Uploaded audio files are stored:
  Locally inside /uploads, OR
