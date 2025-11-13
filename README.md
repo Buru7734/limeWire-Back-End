@@ -25,8 +25,42 @@ A prototype backend server built for an audio-library web app, designed to suppo
   - `DELETE /api/audio/:id`  
 - Designed with scalability and modularity in mind (ready to be extended into full audio-tech product)
 
-## 🔧 Setup & Installation  
-1. Clone the repo  
-   ```bash
-   git clone https://github.com/Buru7734/limeWire-Back-End.git
+  ## 📁 Project Structure
+  /src
+  /controllers
+  /routes
+  /models
+  /middleware
+  /uploads        ← stored audio files (local or cloud)
+  server.js
 
+⚙️ Installation & Setup
+1. Clone the repo
+git clone https://github.com/yourusername/LimeWire-Back-End.git
+cd LimeWire-Back-End
+
+2. Install dependencies
+npm install
+
+3. Create a .env file
+PORT=5000
+DATABASE_URL=postgres://user:password@localhost:5432/limewire
+JWT_SECRET=your_jwt_secret
+UPLOAD_DIR=uploads
+
+4. Start the server
+npm run dev   # nodemon
+
+🔐 Authentication
+
+ All protected routes require:
+ Authorization: Bearer <token>
+
+📦 Upload Handling
+
+ Uploaded audio files are stored:
+ Locally inside /uploads, OR
+
+Connected to S3 (if configured)
+
+Metadata is stored in PostgreSQL.
