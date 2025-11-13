@@ -10,7 +10,7 @@ A prototype backend server built for an audio-library web app, designed to suppo
 - Modular code structure: controllers, routes, models, middleware  
 - [Optional: if you used any ORM (Sequelize, TypeORM)—mention here]
 
-##🎧 Key Features
+## 🎧 Key Features
 
 User Authentication
 Register & login with JWT auth
@@ -39,7 +39,7 @@ DELETE /api/audio/:id
   /uploads        ← stored audio files (local or cloud)
   server.js
 
-##⚙️ Installation & Setup
+## ⚙️ Installation & Setup
 1. Clone the repo
 git clone https://github.com/yourusername/LimeWire-Back-End.git
 cd LimeWire-Back-End
@@ -56,12 +56,12 @@ UPLOAD_DIR=uploads
 4. Start the server
 npm run dev   # nodemon
 
-##🔐 Authentication
+## 🔐 Authentication
 
  All protected routes require:
  Authorization: Bearer <token>
 
-##📦 Upload Handling
+## 📦 Upload Handling
 
  Uploaded audio files are stored:
  Locally inside /uploads, OR
